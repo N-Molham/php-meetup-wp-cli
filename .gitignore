@@ -1,0 +1,13 @@
+**/*.build.js
+**/node_modules/**
+**/vendor/**
+**/build/**
+!infrastructure/build/**
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.cache
+sandbox.json
+/.idea/
+**/.DS_Store
+phpunit.local.xml
