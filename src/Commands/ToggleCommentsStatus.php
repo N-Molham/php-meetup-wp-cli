@@ -4,6 +4,7 @@ namespace Nmolham\PhpMeetupWpCli\Commands;
 
 use Exception;
 use WP_CLI;
+use WP_Post;
 
 class ToggleCommentsStatus
 {
@@ -19,7 +20,7 @@ class ToggleCommentsStatus
                     'type'        => 'positional',
                     'name'        => 'status',
                     'description' => 'Which status to set the comments to',
-                    'options'     => ['open', 'closed', 'toggle'],
+                    'options'     => ['open', 'closed', 'toggle', 'random'],
                     'optional'    => false,
                 ],
                 [
@@ -35,23 +36,18 @@ class ToggleCommentsStatus
 
     public function __invoke(array $args, array $assocArgs) : void
     {
-        $postIds = explode(',', WP_CLI\Utils\get_flag_value($assocArgs, 'only'));
+        $postIds = array_filter(explode(',', WP_CLI\Utils\get_flag_value($assocArgs, 'only')));
 
         $targetStatus = $args[0];
-        $toggle = 'toggle' === $targetStatus;
 
         $posts = get_posts($postIds ? ['post__in' => $postIds] : ['nopaging' => true]);
 
         $progressBar = WP_CLI\Utils\make_progress_bar('Updating comments status', count($posts));
 
         foreach ($posts as $post) {
-            $newStatus = $targetStatus;
+            $newStatus = $this->determineNewStatus($targetStatus, $post);
 
-            if ($toggle) {
-                $newStatus = 'open' === $post->comment_status ? 'closed' : 'open';
-            }
-
-            if ($post->comment_status === $newStatus) {
+            if ($this->shouldNotUpdateStatus($post, $newStatus)) {
                 $progressBar->tick(1, "Comments status already set for post $post->ID");
                 continue;
             }
@@ -67,5 +63,25 @@ class ToggleCommentsStatus
         $progressBar->finish();
 
         WP_CLI::success('Comments status updated');
+    }
+
+    protected function determineNewStatus(string $targetStatus, WP_Post $post) : string
+    {
+        $newStatus = $targetStatus;
+
+        if ('toggle' === $targetStatus) {
+            $newStatus = 'open' === $post->comment_status ? 'closed' : 'open';
+        }
+
+        if ('random' === $targetStatus) {
+            $newStatus = random_int(0, 100) >= 50 ? 'open' : 'closed';
+        }
+
+        return $newStatus;
+    }
+
+    protected function shouldNotUpdateStatus(WP_Post $post, string $newStatus) : bool
+    {
+        return $post->comment_status === $newStatus;
     }
 }
