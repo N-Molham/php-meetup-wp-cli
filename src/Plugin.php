@@ -4,6 +4,7 @@ namespace Nmolham\PhpMeetupWpCli;
 
 use Exception;
 use Nmolham\PhpMeetupWpCli\Commands\RandomPosts;
+use Nmolham\PhpMeetupWpCli\Commands\ToggleCommentsStatus;
 use WP_CLI;
 use function WP_CLI\Utils\format_items;
 
@@ -28,5 +29,6 @@ class Plugin
         }
 
         RandomPosts::register();
+        ToggleCommentsStatus::register();
     }
 }
