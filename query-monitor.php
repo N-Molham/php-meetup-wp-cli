@@ -9,18 +9,12 @@
  * Requires PHP: 8.1
  */
 
+use Nmolham\PhpMeetupWpCli\Plugin;
+
 if (! defined('ABSPATH')) {
     exit;
 }
 
-if (! defined('WP_CLI') || ! WP_CLI) {
-    return;
-}
+require_once __DIR__.'/vendor/autoload.php';
 
-WP_CLI::add_command('random-posts', static function () {
-    WP_CLI\Utils\format_items(
-        'table',
-        get_posts(['orderby' => 'rand', 'posts_per_page' => '10']),
-        ['ID', 'post_title', 'post_status', 'post_date']
-    );
-});
+Plugin::init();
