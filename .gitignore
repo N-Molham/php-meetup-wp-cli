@@ -11,3 +11,5 @@ sandbox.json
 /.idea/
 **/.DS_Store
 phpunit.local.xml
+
+/vendor/
